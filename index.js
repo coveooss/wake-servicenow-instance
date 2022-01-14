@@ -13,7 +13,7 @@ async function sleep(ms) {
 const checkForInstanceWakingUpStatus = async (belowButtonLocator, spinner) => {
     if (await belowButtonLocator.count() >= 1) {
         if ((await belowButtonLocator.textContent('div.item-in-progress-container')).includes('Waking up instance')) {
-            spinner('Instance is waking');
+            spinner = spinner.text('Instance is waking');
             await sleep(INSTANCE_WAKE_DELAY);
             spinner = await checkForInstanceWakingUpStatus(belowButtonLocator);
         } else if (false) { // TODO: add check for wake error

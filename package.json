@@ -4,8 +4,7 @@
   "description": "A script to wake your servicenow instance",
   "main": "index.js",
   "repository": "git@github.com:coveooss/wake-servicenow-instance.git",
-  "author":
-  {
+  "author": {
     "name": "Paul-Arthur Thiéry",
     "email": "pathiery@coveo.com"
   },
