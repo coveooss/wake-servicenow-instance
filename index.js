@@ -1,10 +1,15 @@
 #!/usr/bin/env node
 import ora from 'ora';
 import { chromium } from 'playwright';
+import commandLineArgs from 'command-line-args';
 
 const INSTANCE_WAKE_DELAY = 5000;
 
-const [,, ...args] = process.argv;
+const optionDefinitions = [
+    { name: 'username', alias: 'u', type: String },
+    { name: 'password', alias: 'p', type: String },
+    { name: 'headfull', alias: 'v', type: Boolean },
+];
 
 // eslint-disable-next-line no-promise-executor-return
 const sleep = (ms) => new Promise((res) => setTimeout(res, ms));
@@ -28,24 +33,23 @@ const checkForInstanceWakingUpStatus = async (belowButtonLocator, spinner) => {
 (async () => {
     let username;
     let password;
-    if(process.env.SERVICENOW_USERNAME?.length >= 1) {
+    const { headfull, ...commandLineOptions } = commandLineArgs(optionDefinitions);
+    if (process.env.SERVICENOW_USERNAME?.length >= 1) {
         username = process.env.SERVICENOW_USERNAME;
-    } else if (args[0]?.length >= 1) {
-        username = args[0];
+    } else if (commandLineOptions.username.length >= 1) {
+        username = commandLineOptions.username;
     } else {
-        throw new Error('You need to set a non-null SERVICENOW_USERNAME env variable or pass it as an argument')
+        throw new Error('You need to set a non-null SERVICENOW_USERNAME env variable or pass it as an argument');
     }
     if (process.env.SERVICENOW_PASSWORD?.length >= 1) {
         password = process.env.SERVICENOW_PASSWORD;
-    } else if (args[1]?.length >= 1) {
-        password = args[1];
-    } else if (args[0]?.length >= 1) {
-        password = args[0];
+    } else if (commandLineOptions.password.length >= 1) {
+        password = commandLineOptions.password;
     } else {
-        throw new Error('You need to set a non-null SERVICENOW_PASSWORD env variable or pass it as an argument')
+        throw new Error('You need to set a non-null SERVICENOW_PASSWORD env variable or pass it as an argument');
     }
     let spinner = ora('Starting ServiceNow waker').start();
-    const browser = await chromium.launch();
+    const browser = await chromium.launch({ headless: !headfull });
     const page = await browser.newPage();
     await page.goto('https://developer.servicenow.com/dev.do', {
         timeout: 100000,
