@@ -6,24 +6,24 @@ const INSTANCE_WAKE_DELAY = 5000;
 
 const [,, ...args] = process.argv;
 
-async function sleep(ms) {
-    return new Promise(res => setTimeout(res, ms));
-}
+// eslint-disable-next-line no-promise-executor-return
+const sleep = (ms) => new Promise((res) => setTimeout(res, ms));
 
 const checkForInstanceWakingUpStatus = async (belowButtonLocator, spinner) => {
+    let newSpinner = spinner;
     if (await belowButtonLocator.count() >= 1) {
         if ((await belowButtonLocator.textContent('div.item-in-progress-container')).includes('Waking up instance')) {
-            spinner = spinner.text('Instance is waking');
+            newSpinner = newSpinner.text('Instance is waking');
             await sleep(INSTANCE_WAKE_DELAY);
-            spinner = await checkForInstanceWakingUpStatus(belowButtonLocator, spinner);
+            newSpinner = await checkForInstanceWakingUpStatus(belowButtonLocator, newSpinner);
         } else if (false) { // TODO: add check for wake error
-            spinner = spinner.fail('Error waking instance')
+            newSpinner = newSpinner.fail('Error waking instance')
                 .start('Trying to recover');
             // TODO: add recover code
         }
     }
-    return spinner;
-}
+    return newSpinner;
+};
 
 (async () => {
     let username;
@@ -56,11 +56,11 @@ const checkForInstanceWakingUpStatus = async (belowButtonLocator, spinner) => {
     await page.click('.dps-button-label');
     await page.type('#username', username);
     await page.click('#usernameSubmitButton');
-    await page.waitForResponse('https://signon.service-now.com/xmlhttp.do'),
+    await page.waitForResponse('https://signon.service-now.com/xmlhttp.do');
     await page.type('#password', password);
     await page.click('#submitButton');
     if ((await page.textContent('#errorPlaceholder', {
-        timeout: 600
+        timeout: 600,
     })).includes('is invalid')) {
         spinner.fail('Invalid username or password');
         process.exit(1);
